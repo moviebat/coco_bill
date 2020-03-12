@@ -181,19 +181,22 @@ def read_file(root_path, json_file, train_path):
         if '1' in dirnames:
             image_dir = os.path.join(dirpath, '1')
             rec_dir = os.path.join(dirpath, 'rec')
-            label_file = os.path.join(rec_dir, 'revised.txt')
-
-            if not os.path.exists(label_file):
-                print("revised.txt文件不存在，请查看%s目录" % dirnames)
+            if os.path.exists(os.path.join(rec_dir, 'revised.txt')):
+                label_file = os.path.join(rec_dir, 'revised.txt')
+            elif os.path.exists(os.path.join(rec_dir, 'revise.txt')):
+                label_file = os.path.join(rec_dir, 'revise.txt')
             else:
-                '''遍历score文件和1目录
-                '''
-                image, annotation = do_process(image_dir, label_file, train_path,
-                                               image_index, annotation_index)
-                image_list.extend(image)
-                annotation_list.extend(annotation)
-                image_index = image_index + len(image)
-                annotation_index = annotation_index + len(annotation)
+                print("revised.txt文件不存在，请查看%s目录" % rec_dir)
+                continue
+
+            '''遍历score文件和1目录
+            '''
+            image, annotation = do_process(image_dir, label_file, train_path,
+                                           image_index, annotation_index)
+            image_list.extend(image)
+            annotation_list.extend(annotation)
+            image_index = image_index + len(image)
+            annotation_index = annotation_index + len(annotation)
 
     categories = create_categories()
     content = Instance(info, image_list, annotation_list, categories)
@@ -221,13 +224,13 @@ def move_file(srcfile, dstfile):
 
 
 def main():
-    # root_path = "/home/zealens/dyq/datas/val/20191119-2000Train"
-    # json_path = '/home/zealens/dyq/CenterNet/data/coco_bill/annotations/instances_val2017.json'
-    # train_path = '/home/zealens/dyq/CenterNet/data/coco_bill/val2017'
-    root_path = "E:\\coco_bill\\20200203-mijiqiu"
-    # root_path = "E:\\coco_bill\\selected-24_object-nodeals"
-    json_file = 'E:\\coco_bill\\data\\coco_bill\\annotations\\instances_val2017.json'
-    train_path = 'E:\\coco_bill\\data\\coco_bill\\val2017'
+    root_path = "/home/zealens/dyq/datas/val/20191119-2000Train"
+    json_file = '/home/zealens/dyq/CenterNet/data/coco_bill/annotations/instances_val2017.json'
+    train_path = '/home/zealens/dyq/CenterNet/data/coco_bill/val2017'
+    # root_path = "E:\\coco_bill\\20200203-mijiqiu"
+    # # root_path = "E:\\coco_bill\\selected-24_object-nodeals"
+    # json_file = 'E:\\coco_bill\\data\\coco_bill\\annotations\\instances_val2017.json'
+    # train_path = 'E:\\coco_bill\\data\\coco_bill\\val2017'
     if not os.path.exists(train_path):
         os.makedirs(train_path)
 
@@ -236,6 +239,8 @@ def main():
         os.makedirs(fpath)
 
     read_file(root_path, json_file, train_path)
+
+    print('完成转换')
 
 
 if __name__ == "__main__":
