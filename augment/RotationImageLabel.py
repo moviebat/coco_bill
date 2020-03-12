@@ -16,7 +16,7 @@ def rotate_bbox(x, y):
     x1 = float(x)
     y1 = 600 - float(y)
     x2 = 480
-    y2 = 600 -300
+    y2 = 600 - 300
 
     x = (x1 - x2) * math.cos(temp_angle) - (y1 - y2) * math.sin(temp_angle) + x2
     y = (x1 - x2) * math.sin(temp_angle) + (y1 - y2) * math.cos(temp_angle) + y2
