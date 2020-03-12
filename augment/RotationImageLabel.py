@@ -6,14 +6,25 @@ import math
 from PIL import Image
 
 
-angle = 5
+angle = 10
+scale = 1.
+pi = 3.1415926
 
 
-def rotate_bbox(self, x, y, angle, scale=1.):
+def rotate_bbox(x, y):
+    temp_angle = pi * angle / 180
+    x1 = float(x)
+    y1 = 600 - float(y)
+    x2 = 480
+    y2 = 600 -300
 
-    angle_temp = 10 * math.pi / 180.0
-    rotated_x = x
-    rotated_y = y
+    x = (x1 - x2) * math.cos(temp_angle) - (y1 - y2) * math.sin(temp_angle) + x2
+    y = (x1 - x2) * math.sin(temp_angle) + (y1 - y2) * math.cos(temp_angle) + y2
+    x = x + 1
+    y = 600 - y + 1
+
+    rotated_x = int(x)
+    rotated_y = int(y)
     return rotated_x, rotated_y
 
 
@@ -26,8 +37,8 @@ def transfer_array(billiards_array):
             #获取category_id
             temp = re.split("[(,!)]", billiard)
             catetory_id, x, y = temp[0], temp[1], temp[2]
-            rotated_x, rotated_y = rotate_bbox(x, y, 10, 1)
-            newbilliards = newbilliards + catetory_id + '(' + str(rotated_x) + ',' + str(rotated_y) + ')'
+            rotated_x, rotated_y = rotate_bbox(x, y)
+            newbilliards = newbilliards + catetory_id + '(' + str(rotated_x) + ',' + str(rotated_y) + ');'
     return newbilliards
 
 def transfer_process(label_file,  dst_rec_dir):
@@ -45,7 +56,7 @@ def transfer_process(label_file,  dst_rec_dir):
             billiards_array = billiards_and_picture_name[1]  #第二个，台球坐标
             billiards_picture_name = billiards_and_picture_name[2]   #第三个，图片文件名
             billiards = transfer_array(billiards_array)
-            contents = billiards_count + ' ' + billiards + ' ' + billiards_and_picture_name + '\n'
+            contents = billiards_count + ' ' + billiards + ' ' + billiards_picture_name + '\n'
             fo.write(contents)
     finally:
         file_object.close()
@@ -96,18 +107,16 @@ def read_file(source_path, dest_path):
                 os.makedirs(dst_dir)
             if not os.path.exists(dst_rec_dir):
                 os.makedirs(dst_rec_dir)
-            print(image_dir)
-            print(dst_dir)
-            print(dst_rec_dir)
             rotate_process(image_dir, dst_dir)
             transfer_process(label_file, dst_rec_dir)
+            print('转换完成')
 
 
 def main():
     # 要拷贝数据的根目录
     # root_path = "E:\\coco_bill\\selected-24_object-nodeals"
-    source_path = "G:\\dyq\\20200310-Train-darken"
-    dest_path = "G:\\dyq\\20200310-Train-rotation05"
+    source_path = "G:\\dyq\\20200310-Train-rotate"
+    dest_path = "G:\\dyq\\20200310-Train-rotation10"
     read_file(source_path, dest_path)
 
 
