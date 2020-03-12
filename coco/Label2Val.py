@@ -229,7 +229,7 @@ def main():
     json_file = 'E:\\coco_bill\\data\\coco_bill\\annotations\\instances_val2017.json'
     train_path = 'E:\\coco_bill\\data\\coco_bill\\val2017'
     if not os.path.exists(train_path):
-        os.makedirs(train_path)  # 创建路径
+        os.makedirs(train_path)
 
     fpath, fname = os.path.split(json_file)  # 分离文件名和路径
     if not os.path.exists(fpath):

@@ -162,13 +162,13 @@ def do_process(image_dir, label_file, train_path, image_index, annotation_index)
             # print(annotation_list)
             #开始拷贝图片
             if not copy_image(image_dir, train_path, picture_name):
-                print("文件没有拷贝成功" % picture_name)
+                print("%s文件没有拷贝成功" % picture_name)
     finally:
         file_object.close()
     return image_list, annotation_list
 
 
-def read_file(root_path, json_path, train_path):
+def read_file(root_path, json_file, train_path):
     ''' 自动找到1目录作为图片目录去执行，points文件从同级别rec目录下的revised.txt读取
     '''
     info = create_info()
@@ -200,11 +200,12 @@ def read_file(root_path, json_path, train_path):
     categories = create_categories()
     content = Instance(info, image_list, annotation_list, categories)
     content_str = json.dumps(content, default=lambda o: o.__dict__, sort_keys=False, indent=4)
-    with open(json_path, 'w')as f:
+    with open(json_file, 'w')as f:
         f.write(content_str)
 
 
 def regular_filename(filename):
+    regular_file_name = filename
     if len(filename) < 8:
         regular_file_name = filename.zfill(8)
     # print(regular_fileName)
@@ -229,9 +230,17 @@ def main():
 
     # 要拷贝数据的根目录
     root_path = "E:\\coco_bill\\selected-24_object-nodeals"
-    json_path = 'E:\\coco_bill\\data\\coco_bill\\annotations\\image_info_test-dev2017.json'
+    json_file = 'E:\\coco_bill\\data\\coco_bill\\annotations\\image_info_test-dev2017.json'
     train_path = 'E:\\coco_bill\\data\\coco_bill\\test2017'
-    read_file(root_path, json_path, train_path)
+
+    if not os.path.exists(train_path):
+        os.makedirs(train_path)
+
+    fpath, fname = os.path.split(json_file)  # 分离文件名和路径
+    if not os.path.exists(fpath):
+        os.makedirs(fpath)
+
+    read_file(root_path, json_file, train_path)
 
 
 if __name__ == "__main__":
