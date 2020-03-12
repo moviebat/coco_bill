@@ -149,7 +149,7 @@ def do_process(image_dir, label_file, train_path, image_index, annotation_index)
             # 8 0(361,191);3(178,112);8(402,166);9(148,155);10(81,496);11(621,212);15(527,478); 224960
             billiards_and_picture_name = line.rstrip('\n').split(" ")
             billiards_array = billiards_and_picture_name[1]
-            print(billiards_and_picture_name[2])
+            # print(billiards_and_picture_name[2])
             picture_name = regular_filename(str(billiards_and_picture_name[2]))
 
 
@@ -164,8 +164,8 @@ def do_process(image_dir, label_file, train_path, image_index, annotation_index)
             annotation_index = annotation_index + len(annotation)
             # print(annotation_list)
             #开始拷贝图片
-            # if not copy_image(image_dir, train_path, picture_name):
-            #     print("%s文件没有拷贝成功" % picture_name)
+            if not copy_image(image_dir, train_path, picture_name):
+                print("%s文件没有拷贝成功" % picture_name)
     finally:
         file_object.close()
     return image_list, annotation_list
@@ -228,17 +228,14 @@ def move_file(srcfile, dstfile):
 
 
 def main():
-    # root_path = "/home/zealens/1210model"
-    # root_path = "/media/zealens/4/dyq/20200203-higherrorrate"
     # 要拷贝数据的根目录
-    # root_path = "/home/zealens/dyq/datas/train"
-    # json_file = '/home/zealens/dyq/CenterNet/data/coco_bill/annotations/instances_train2017.json'
-    # train_path = '/home/zealens/dyq/CenterNet/data/coco_bill/train2017'
+    root_path = "/home/zealens/dyq/datas/train"
+    json_file = '/home/zealens/dyq/CenterNet/data/coco_bill/annotations/instances_train2017.json'
+    train_path = '/home/zealens/dyq/CenterNet/data/coco_bill/train2017'
 
-    root_path = "E:\\coco_bill\\20200203-mijiqiu"
-    #
-    json_file = 'E:\\coco_bill\\data\\coco_bill\\annotations\\instances_train2017.json'
-    train_path = 'E:\\coco_bill\\data\\coco_bill\\train2017'
+    # root_path = "E:\\coco_bill\\20200203-mijiqiu"
+    # json_file = 'E:\\coco_bill\\data\\coco_bill\\annotations\\instances_train2017.json'
+    # train_path = 'E:\\coco_bill\\data\\coco_bill\\train2017'
 
     if not os.path.exists(train_path):
         os.makedirs(train_path)  # 创建路径
@@ -248,6 +245,7 @@ def main():
         os.makedirs(fpath)  # 创建路径
 
     read_file(root_path, json_file, train_path)
+    print('完成')
 
 
 if __name__ == "__main__":
