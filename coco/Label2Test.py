@@ -218,7 +218,7 @@ def move_file(srcfile, dstfile):
         fpath, fname=os.path.split(dstfile)    #分离文件名和路径
         if not os.path.exists(fpath):
             os.makedirs(fpath)                #创建路径
-        shutil.move(srcfile, dstfile)          #移动文件
+        shutil.copyfile(srcfile, dstfile)          #移动文件
         result = True
     return result
 
