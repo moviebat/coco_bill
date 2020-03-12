@@ -1,4 +1,10 @@
 # /usr/env/bin python3
+'''将标注完的数据，生成COCO数据格式的训练数据val
+    1、拷贝图片到val2017目录
+    2、读取points文件，进行坐标转换
+    3、生成val2017.json文件
+    4、
+'''
 
 import re
 import sys
@@ -99,7 +105,7 @@ def create_images_annotations(picture_name, billiards, image_index, annotation_i
             #获取category_id
             temp = re.split("[(,!)]", billiard)
             catetory_id, x, y = temp[0], temp[1], temp[2]
-            bbox = [int(x), int(y), 20, 20]
+            bbox = [int(x)-10, int(y)-10, 20, 20]
             annotation = Annotation(314, 0, image_index + 1, bbox, int(catetory_id)+1,
                                     annotation_index + 1)
             annotations.append(annotation)
@@ -163,7 +169,7 @@ def do_process(image_dir, label_file, train_path, image_index, annotation_index)
     return image_list, annotation_list
 
 
-def read_file(root_path, json_path, train_path):
+def read_file(root_path, json_file, train_path):
     ''' 自动找到1目录作为图片目录去执行，points文件从同级别rec目录下的revised.txt读取
     '''
     info = create_info()
@@ -192,7 +198,7 @@ def read_file(root_path, json_path, train_path):
     categories = create_categories()
     content = Instance(info, image_list, annotation_list, categories)
     content_str = json.dumps(content, default=lambda o: o.__dict__, sort_keys=False, indent=4)
-    with open(json_path, 'w')as f:
+    with open(json_file, 'w')as f:
         f.write(content_str)
 
 
@@ -215,13 +221,21 @@ def move_file(srcfile, dstfile):
 
 
 def main():
-    # root_path = "/home/zealens/1210model"
-    # root_path = "/media/zealens/4/dyq/20200203-higherrorrate"
+    # root_path = "/home/zealens/dyq/datas/val/20191119-2000Train"
+    # json_path = '/home/zealens/dyq/CenterNet/data/coco_bill/annotations/instances_val2017.json'
+    # train_path = '/home/zealens/dyq/CenterNet/data/coco_bill/val2017'
     root_path = "E:\\coco_bill\\20200203-mijiqiu"
     # root_path = "E:\\coco_bill\\selected-24_object-nodeals"
-    json_path = 'E:\\coco_bill\\coco\\annotations\\instances_val2017.json'
-    train_path = 'E:\\coco_bill\\coco\\val2017'
-    read_file(root_path, json_path, train_path)
+    json_file = 'E:\\coco_bill\\data\\coco_bill\\annotations\\instances_val2017.json'
+    train_path = 'E:\\coco_bill\\data\\coco_bill\\val2017'
+    if not os.path.exists(train_path):
+        os.makedirs(train_path)  # 创建路径
+
+    fpath, fname = os.path.split(json_file)  # 分离文件名和路径
+    if not os.path.exists(fpath):
+        os.makedirs(fpath)
+
+    read_file(root_path, json_file, train_path)
 
 
 if __name__ == "__main__":

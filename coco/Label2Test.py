@@ -1,5 +1,10 @@
 # /usr/env/bin python3
-
+'''将标注完的数据，生成COCO数据格式的测试数据test
+    1、拷贝图片到test2017目录
+    2、读取points文件，进行坐标转换
+    3、生成test2017.json文件
+    4、
+'''
 import re
 import sys
 import os
@@ -92,7 +97,7 @@ def create_info():
 def create_images_annotations(picture_name, billiards, image_index, annotation_index):
     images = list()
     annotations = list()
-    image = Image('frame_' + picture_name + '.bmp', 960, 600, image_index + 1)
+    image = Image(picture_name + '.bmp', 960, 600, image_index + 1)
     images.append(image)
     for billiard in billiards:
         if billiard.strip() != '':
@@ -103,7 +108,7 @@ def create_images_annotations(picture_name, billiards, image_index, annotation_i
             annotation = Annotation(314, 0, image_index + 1, bbox, int(catetory_id)+1,
                                     annotation_index + 1)
             annotations.append(annotation)
-        annotation_index = annotation_index + 1
+            annotation_index = annotation_index + 1
     return images, annotations
 
 
@@ -175,19 +180,22 @@ def read_file(root_path, json_path, train_path):
         if '1' in dirnames:
             image_dir = os.path.join(dirpath, '1')
             rec_dir = os.path.join(dirpath, 'rec')
-            label_file = os.path.join(rec_dir, 'revised.txt')
-
-            if not os.path.exists(label_file):
-                print("revised.txt文件不存在，请查看%s目录" % dirnames)
+            if os.path.exists(os.path.join(rec_dir, 'revised.txt')):
+                label_file = os.path.join(rec_dir, 'revised.txt')
+            elif os.path.exists(os.path.join(rec_dir, 'revise.txt')):
+                label_file = os.path.join(rec_dir, 'revise.txt')
             else:
-                '''遍历score文件和1目录
-                '''
-                image, annotation = do_process(image_dir, label_file, train_path,
-                                               image_index, annotation_index)
-                image_list.extend(image)
-                annotation_list.extend(annotation)
-                image_index = image_index + len(image)
-                annotation_index = annotation_index + len(annotation)
+                print("revised.txt文件不存在，请查看%s目录" % rec_dir)
+                continue
+
+            '''遍历score文件和1目录
+            '''
+            image, annotation = do_process(image_dir, label_file, train_path,
+                                           image_index, annotation_index)
+            image_list.extend(image)
+            annotation_list.extend(annotation)
+            image_index = image_index + len(image)
+            annotation_index = annotation_index + len(annotation)
 
     categories = create_categories()
     content = Instance(info, image_list, annotation_list, categories)
@@ -197,7 +205,6 @@ def read_file(root_path, json_path, train_path):
 
 
 def regular_filename(filename):
-    regular_file_name = filename
     if len(filename) < 8:
         regular_file_name = filename.zfill(8)
     # print(regular_fileName)
@@ -210,21 +217,20 @@ def move_file(srcfile, dstfile):
         fpath, fname=os.path.split(dstfile)    #分离文件名和路径
         if not os.path.exists(fpath):
             os.makedirs(fpath)                #创建路径
-        # shutil.move(srcfile, dstfile)       #移动文件
-        shutil.copyfile(srcfile, dstfile)
+        shutil.move(srcfile, dstfile)          #移动文件
         result = True
     return result
 
 
 def main():
-    # root_path = "/home/zealens/1210model"
-    # root_path = "/media/zealens/4/dyq/20200203-higherrorrate"
+    # root_path = "/home/zealens/dyq/datas/test"
+    # json_path = '/home/zealens/dyq/CenterNet/data/coco_bill/annotations/image_info_test-dev2017.json'
+    # train_path = '/home/zealens/dyq/CenterNet/data/coco_bill/test2017'
+
     # 要拷贝数据的根目录
-    # root_path = "E:\\coco_bill\\selected-24_object-nodeals"
-    root_path = "E:\\coco_bill\\20200203-mijiqiu"
-    #
-    json_path = 'E:\\coco_bill\\coco\\annotations\\instances_train2017.json'
-    train_path = 'E:\\coco_bill\\coco\\train2017'
+    root_path = "E:\\coco_bill\\selected-24_object-nodeals"
+    json_path = 'E:\\coco_bill\\data\\coco_bill\\annotations\\image_info_test-dev2017.json'
+    train_path = 'E:\\coco_bill\\data\\coco_bill\\test2017'
     read_file(root_path, json_path, train_path)
 
 
