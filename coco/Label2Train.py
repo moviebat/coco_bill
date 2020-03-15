@@ -15,7 +15,7 @@ import time
 import datetime
 import os,shutil
 from pathlib import Path
-
+import logging
 
 class Info:
     description = ""
@@ -98,7 +98,7 @@ def create_info():
 def create_images_annotations(picture_name, billiards, image_index, annotation_index):
     images = list()
     annotations = list()
-    image = Image('frame_' + picture_name + '.bmp', 960, 600, image_index + 1)
+    image = Image(picture_name + '.bmp', 960, 600, image_index + 1)
     images.append(image)
     for billiard in billiards:
         if billiard.strip() != '':
@@ -122,8 +122,8 @@ def create_categories():
 
 
 def copy_image(image_dir, train_path, picture_name):
-    srcPath = os.path.join(image_dir, 'frame_' + picture_name + '.bmp')
-    destPath = os.path.join(train_path, 'frame_' + picture_name + '.bmp')
+    srcPath = os.path.join(image_dir, picture_name + '.bmp')
+    destPath = os.path.join(train_path, picture_name + '.bmp')
     if move_file(srcPath, destPath):
         return True
     else:
@@ -150,9 +150,7 @@ def do_process(image_dir, label_file, train_path, image_index, annotation_index)
             billiards_and_picture_name = line.rstrip('\n').split(" ")
             billiards_array = billiards_and_picture_name[1]
             # print(billiards_and_picture_name[2])
-            picture_name = regular_filename(str(billiards_and_picture_name[2]))
-
-
+            picture_name = billiards_and_picture_name[2]
             billiards = get_billiards(billiards_array)
             image = list()
             annotation = list()
@@ -162,10 +160,9 @@ def do_process(image_dir, label_file, train_path, image_index, annotation_index)
             image_index = image_index + 1
             annotation_list.extend(annotation)
             annotation_index = annotation_index + len(annotation)
-            # print(annotation_list)
             #开始拷贝图片
             if not copy_image(image_dir, train_path, picture_name):
-                print("%s文件没有拷贝成功" % picture_name)
+                logger.info("%s文件没有拷贝成功" % picture_name)
     finally:
         file_object.close()
     return image_list, annotation_list
@@ -183,12 +180,13 @@ def read_file(root_path, json_file, train_path):
         if '1' in dirnames:
             image_dir = os.path.join(dirpath, '1')
             rec_dir = os.path.join(dirpath, 'rec')
+            logger.info(image_dir)
             if os.path.exists(os.path.join(rec_dir, 'revised.txt')):
                 label_file = os.path.join(rec_dir, 'revised.txt')
             elif os.path.exists(os.path.join(rec_dir, 'revise.txt')):
                 label_file = os.path.join(rec_dir, 'revise.txt')
             else:
-                print("revised.txt文件不存在，请查看%s目录" % rec_dir)
+                logger.info("revised.txt文件不存在，请查看%s目录" % rec_dir)
                 continue
 
             '''遍历score文件和1目录
@@ -199,20 +197,15 @@ def read_file(root_path, json_file, train_path):
             annotation_list.extend(annotation)
             image_index = image_index + len(image)
             annotation_index = annotation_index + len(annotation)
+            logger.info('%s目录处理成功' % image_dir)
 
     categories = create_categories()
     content = Instance(info, image_list, annotation_list, categories)
     content_str = json.dumps(content, default=lambda o: o.__dict__, sort_keys=False, indent=4)
     with open(json_file, 'w')as f:
         f.write(content_str)
-
-
-def regular_filename(filename):
-    regular_file_name = filename
-    if len(filename) < 8:
-        regular_file_name = filename.zfill(8)
-    # print(regular_fileName)
-    return regular_file_name
+        logger.info('写%s标签文件成功' % json_file)
+    return image_index, annotation_index
 
 
 def move_file(srcfile, dstfile):
@@ -229,7 +222,7 @@ def move_file(srcfile, dstfile):
 
 def main():
     # 要拷贝数据的根目录
-    root_path = "/home/zealens/dyq/datas/train"
+    root_path = "/home/zealens/dyq/datas/train1"
     json_file = '/home/zealens/dyq/CenterNet/data/coco_bill/annotations/instances_train2017.json'
     train_path = '/home/zealens/dyq/CenterNet/data/coco_bill/train2017'
 
@@ -244,9 +237,11 @@ def main():
     if not os.path.exists(fpath):
         os.makedirs(fpath)  # 创建路径
 
-    read_file(root_path, json_file, train_path)
-    print('完成')
+    image_count, annotation_count = read_file(root_path, json_file, train_path)
+    logger.info('数据转换完成，共完成图片拷贝%d张，标签%d个' % (image_count, annotation_count))
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(os.path.basename(sys.argv[0]).split(".")[0])
     main()

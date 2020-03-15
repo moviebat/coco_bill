@@ -8,12 +8,39 @@
 
 import re
 import os.path
-import os,shutil
+import os,sys
 from PIL import Image
 import cv2
+import logging
+from utils.date_utils import MyDateUtils
+
 
 #0垂直  1水平 -1水平垂直
 flipping = -1
+
+
+def transfer_process(label_file, dst_label_file, timestamp):
+    '''将label文件的坐标转换后保存'''
+
+    file_object = open(label_file, 'r')
+    fo = open(dst_label_file, "w")
+    try:
+        for line in file_object:
+            # 8 0(361,191);3(178,112);8(402,166);9(148,155);10(81,496);11(621,212);15(527,478); 224960
+            billiards_and_picture_name = line.rstrip('\n').split(" ")
+            billiards_count = billiards_and_picture_name[0]  #第一个，台球个数
+            billiards_array = billiards_and_picture_name[1]  #第二个，台球坐标
+            billiards_picture_name = billiards_and_picture_name[2]   #第三个，图片文件名
+            billiards_picture_name = str(timestamp)[-4:-1] + '_' + billiards_picture_name
+            # logger.info(billiards_picture_name)
+            billiards = transfer_array(billiards_array)
+            contents = billiards_count + ' ' + billiards + ' ' + billiards_picture_name + '\n'
+            fo.write(contents)
+    finally:
+        file_object.close()
+        fo.close()
+
+
 
 def transfer_array(billiards_array):
     #0(361,191);3(178,112);8(402,166);9(148,155);10(81,496);11(621,212);15(527,478);
@@ -57,7 +84,7 @@ def label_process(label_file,  dst_label_file):
         fo.close()
 
 
-def flipping_process(image_dir, dst_dir):
+def flipping_process(image_dir, dst_dir, timestamp):
     '''将图片旋转后保存'''
     filenames = os.listdir(image_dir)
     filenames.sort(key=lambda x: x[:-4])  # 文件夹文件排序
@@ -73,7 +100,12 @@ def flipping_process(image_dir, dst_dir):
         elif flipping == -1:
             h_flip = cv2.flip(image, -1)
 
-        cv2.imwrite(os.path.join(dst_dir, file), h_flip)
+        file = str(timestamp)[-4:-1] + '_' + file
+        try:
+            cv2.imwrite(os.path.join(dst_dir, file), h_flip)
+        except cv2.error:
+            logger.info("Error: 写文件失败%s" % file)
+
 
 
 def read_file(source_path, dest_path):
@@ -96,29 +128,35 @@ def read_file(source_path, dest_path):
                 label_file = os.path.join(rec_dir, 'revise.txt')
                 dst_label_file = os.path.join(dst_rec_dir, 'revise.txt')
             else:
-                print("revised.txt文件不存在，请查看%s目录" % rec_dir)
+                logger.info("revised.txt文件不存在，请查看%s目录" % rec_dir)
                 continue
 
             if not os.path.exists(dst_dir):
                 os.makedirs(dst_dir)
             if not os.path.exists(dst_rec_dir):
                 os.makedirs(dst_rec_dir)
-            print(image_dir)
-            print(dst_dir)
-            print(dst_rec_dir)
-            flipping_process(image_dir, dst_dir)
-            if(not label_process(label_file, dst_label_file)):
-                print("%s文件没有拷贝成功" % label_file)
-            print('处理完成')
+            date_string = MyDateUtils.cur_datetime()
+            timestamp = str(MyDateUtils.datetime_to_seconds(date_string))
+            flipping_process(image_dir, dst_dir, timestamp)
+            transfer_process(label_file, dst_label_file, timestamp)
+            logger.info('对%s进行数据增强成功' % image_dir )
+            # if(not label_process(label_file, dst_label_file)):
+            #     print("%s文件没有拷贝成功" % label_file)
 
 
 def main():
     # 要拷贝数据的根目录
     # root_path = "E:\\coco_bill\\selected-24_object-nodeals"
-    source_path = "G:\\dyq\\20200310-Train-darken"
-    dest_path = "G:\\dyq\\20200310-Train-dou"
+    source_path = "/home/zealens/dyq/datas/train/20191018-5000Train"
+    dest_path = "20191018-5000Train-flippD"
+
+    # source_path = "G:\\dyq\\20200310-Train-darken"
+    # dest_path = "G:\\dyq\\20200310-Train-dou"
     read_file(source_path, dest_path)
+    logger.info('处理完成')
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(os.path.basename(sys.argv[0]).split(".")[0])
     main()
