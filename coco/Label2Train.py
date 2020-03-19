@@ -162,7 +162,7 @@ def do_process(image_dir, label_file, train_path, image_index, annotation_index)
             annotation_index = annotation_index + len(annotation)
             #开始拷贝图片
             if not copy_image(image_dir, train_path, picture_name):
-                logger.info("%s文件没有拷贝成功" % picture_name)
+                logger.info("%s目录下的%s文件没有拷贝成功" % (image_dir,picture_name))
     finally:
         file_object.close()
     return image_list, annotation_list
@@ -222,7 +222,7 @@ def move_file(srcfile, dstfile):
 
 def main():
     # 要拷贝数据的根目录
-    root_path = "/home/zealens/dyq/datas/train1"
+    root_path = "/media/zealens/TX2Data/dyq/datas/train"
     json_file = '/home/zealens/dyq/CenterNet/data/coco_bill/annotations/instances_train2017.json'
     train_path = '/home/zealens/dyq/CenterNet/data/coco_bill/train2017'
 

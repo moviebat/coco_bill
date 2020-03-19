@@ -8,6 +8,7 @@ import datetime
 import os,shutil
 from pathlib import Path
 import logging
+from utils.date_utils import MyDateUtils
 
 
 def process_filename(filename):
@@ -18,7 +19,7 @@ def process_filename(filename):
     return regular_file_name
 
 
-def do_process(image_dir, label_file, new_label_file):
+def do_process(image_dir, label_file, new_label_file, timestamp):
     '''深度方案执行一个目录下图片的识别，图片是已经矫正后的图片'''
     file_object = open(label_file, 'r')
     new_content =''
@@ -32,13 +33,17 @@ def do_process(image_dir, label_file, new_label_file):
             billiards_count = billiards_and_picture_name[0]  #第一个，台球个数
             billiards_array = billiards_and_picture_name[1]  #第二个，台球坐标
             billiards_picture_name = billiards_and_picture_name[2]   #第三个，图片文件名
-            picture_name = 'frame_' + process_filename(str(billiards_picture_name))
 
-            new_picture_name = os.path.join(image_dir, picture_name + '.bmp')
-            my_file = Path(new_picture_name)
+            old_picture_name =  billiards_picture_name + '.bmp'
+            new_picture_name = str(timestamp)[-4:-1] + '_' + old_picture_name
+
+            old_picture_path = os.path.join(image_dir, old_picture_name)
+            new_picture_path = os.path.join(image_dir, new_picture_name)
+            my_file = Path(old_picture_path)
             if my_file.exists():# 指定的文件存在
                 success_count = success_count + 1
-                new_content = new_content + billiards_count + ' ' + billiards_array + ' ' + picture_name + '\n'
+                os.rename(old_picture_path, new_picture_path)
+                new_content = new_content + billiards_count + ' ' + billiards_array + ' ' + new_picture_name + '\n'
             else:
                 failure_count = failure_count + 1
                 logger.error('%s文件不存在' % my_file)
@@ -61,7 +66,7 @@ def do_process(image_dir, label_file, new_label_file):
     return success_count, failure_count
 
 
-def  regular_filename(root_path):
+def  add_randomize(root_path):
     success_count = 0
     failure_count = 0
     new_label_file = ''
@@ -79,7 +84,10 @@ def  regular_filename(root_path):
                 continue
             '''遍历score文件和1目录
             '''
-            succ_count, fail_count = do_process(image_dir, label_file, new_label_file)
+            date_string = MyDateUtils.cur_datetime()
+            timestamp = str(MyDateUtils.datetime_to_seconds(date_string))
+
+            succ_count, fail_count = do_process(image_dir, label_file, new_label_file, timestamp)
             success_count = success_count + succ_count
             failure_count = fail_count + fail_count
 
@@ -88,10 +96,10 @@ def  regular_filename(root_path):
 
 def main():
     # 要拷贝数据的根目录
-    root_path = "/media/zealens/TX2Data/dyq/datas/train1/20200205-1000-Test"
+    root_path = "/media/zealens/TX2Data/dyq/datas/train1/20200102-500-mijiqiu-Train"
     # root_path = "E:\\coco_bill\\20200203-mijiqiu"
 
-    success_count, failure_count = regular_filename(root_path)
+    success_count, failure_count = add_randomize(root_path)
     logger.info('数据转换完成，共完成图片拷贝%d张，失败%d个' % (success_count, failure_count))
 
 

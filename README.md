@@ -20,6 +20,21 @@
 ### coco
 COCO格式数据生成
 
+#### RegularFileName
+从标注的目录执行后，将图片名称的frame_添加到points文件中去，统一格式
+
+#### CheckImageLabel
+从points文件种读取图片名称，然后去1目录下检查该文件是否存在
+
+#### Label2Train
+从目录下读取图片和points文件，生成COCO格式的训练数据
+
+#### Label2Val
+从目录下读取图片和points文件，生成COCO格式的Val数据
+
+#### Label2Test
+从目录下读取图片和points文件，生成COCO格式的Test数据
+
 ### utils
 工具
 
