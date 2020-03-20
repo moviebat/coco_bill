@@ -34,11 +34,11 @@ def do_process(image_dir, label_file, new_label_file, timestamp):
             billiards_array = billiards_and_picture_name[1]  #第二个，台球坐标
             billiards_picture_name = billiards_and_picture_name[2]   #第三个，图片文件名
 
-            old_picture_name =  billiards_picture_name + '.bmp'
+            old_picture_name =  billiards_picture_name
             new_picture_name = str(timestamp)[-4:-1] + '_' + old_picture_name
 
-            old_picture_path = os.path.join(image_dir, old_picture_name)
-            new_picture_path = os.path.join(image_dir, new_picture_name)
+            old_picture_path = os.path.join(image_dir, old_picture_name + '.bmp')
+            new_picture_path = os.path.join(image_dir, new_picture_name + '.bmp')
             my_file = Path(old_picture_path)
             if my_file.exists():# 指定的文件存在
                 success_count = success_count + 1
@@ -96,7 +96,7 @@ def  add_randomize(root_path):
 
 def main():
     # 要拷贝数据的根目录
-    root_path = "/media/zealens/TX2Data/dyq/datas/train1/20200102-500-mijiqiu-Train"
+    root_path = "/media/zealens/TX2Data/dyq/datas/train1/20191018-5000Train"
     # root_path = "E:\\coco_bill\\20200203-mijiqiu"
 
     success_count, failure_count = add_randomize(root_path)
