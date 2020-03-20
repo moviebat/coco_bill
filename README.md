@@ -46,6 +46,9 @@ COCO格式数据生成
 #### Label2Test
 从目录下读取图片和points文件，生成COCO格式的Test数据
 
+#### CountTypeNumber
+统计每个类别的数量，来查看数量分布是否均匀
+
 ### utils
 工具
 
