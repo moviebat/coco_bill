@@ -9,6 +9,8 @@ import os,shutil
 from pathlib import Path
 import logging
 
+'''从标注的目录执行后，将图片名称的frame_添加到points文件中去，统一格式'''
+
 
 def process_filename(filename):
     regular_file_name = filename
@@ -88,7 +90,7 @@ def  regular_filename(root_path):
 
 def main():
     # 要拷贝数据的根目录
-    root_path = "/media/zealens/TX2Data/dyq/datas/train1/20200205-1000-Test"
+    root_path = "/media/zealens/TX2Data/dyq/datas/train2/stripe_balls_data"
     # root_path = "E:\\coco_bill\\20200203-mijiqiu"
 
     success_count, failure_count = regular_filename(root_path)
