@@ -4,6 +4,10 @@ import os,sys
 import logging
 from PIL import Image
 
+'''海康200万相机采集1920*1200图片，自动将图片缩小到1/4大小，即长宽均相应缩小一半
+'''
+
+
 def resize_images(source_path, dest_path):
     ''' 自动找到1目录作为图片目录去执行，进行resize操作后保存到dest_path里
     '''
@@ -41,8 +45,8 @@ def resize_images(source_path, dest_path):
 
 
 def main():
-    source_path = "F:\\hkvision-images_selected"
-    dest_path = "F:\\hkvision-images_resized"
+    source_path = "F:\\0530shibie\\baiqiu"
+    dest_path = "F:\\0530shibie\\baiqiu_resized"
     resize_images(source_path, dest_path)
 
 if __name__ == '__main__':
